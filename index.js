@@ -40,9 +40,6 @@ const win = new JSDOM().window;
 
 // koushik start 
 
-eyeimg = new Image();
-// eyeimg.src = "eye.png"
-eyeimg.src = "gollaNoBg.png";
 
 
 // koushik end
@@ -1357,19 +1354,51 @@ Drawing.prototype.draw = function(oQRCode) {
                             // Data of the qr code 
                             if(_htOption.dotType=="circ"){
                                 _oContext.beginPath();
-                                // console.log(nLeft + nWidth * (1 - nowDotScale) / 2, 
-                                // nTop ,
-                                // nWidth,
-                                // nHeight );
                                 _oContext.arc(
                                     (nLeft+(nWidth/2)),
                                     (nTop+(nHeight/2)),
                                     (nWidth*.9)/2,
                                     0,
-                                    360);
+                                    Math.PI*2);
                                 _oContext.fill();
-
-                            }else{
+                            }else if(_htOption.dotType=="line-x"){
+                                // unable to get the state of the next dot 
+                                let left = row==0 ? false : oQRCode.isDark(row-1,col);
+                                let right = row==nCount-1 ? false : oQRCode.isDark(row+1,col);
+                                console.log(row,col,left,right);
+                                if(left && right){
+                                    _oContext.fillRect(nLeft + nWidth * (1 - nowDotScale) / 2, _htOption.titleHeight +
+                                    nTop +
+                                    nHeight * (1 -
+                                        nowDotScale) / 2, nWidth * nowDotScale, nHeight * nowDotScale);
+                                }else if(right){
+                                    _oContext.beginPath();
+                                    _oContext.arc(
+                                        (nLeft+(nWidth/2)),
+                                        (nTop+(nHeight/2)),
+                                        (nWidth*.9)/2,
+                                        Math.PI*1.5,
+                                        Math.PI*0.5,
+                                        true);
+                                    _oContext.fill();
+                                }else if(left){
+                                    _oContext.beginPath();
+                                    _oContext.arc(
+                                        (nLeft+(nWidth/2)),
+                                        (nTop+(nHeight/2)),
+                                        (nWidth*.9)/2,
+                                        Math.PI*1.5,
+                                        Math.PI*0.5,
+                                        false);
+                                    _oContext.fill();
+                                }else {
+                                    _oContext.fillRect(nLeft + nWidth * (1 - nowDotScale) / 2, _htOption.titleHeight +
+                                    nTop +
+                                    nHeight * (1 -
+                                        nowDotScale) / 2, nWidth * nowDotScale, nHeight * nowDotScale);
+                                }
+                            }
+                            else{
                                 _oContext.fillRect(nLeft + nWidth * (1 - nowDotScale) / 2, _htOption.titleHeight +
                                 nTop +
                                 nHeight * (1 -
@@ -1388,20 +1417,15 @@ Drawing.prototype.draw = function(oQRCode) {
             }
         }
 
-        // working prototype do not delete
 
-        // _oContext.drawImage(eyeimg,0,0,((7)*nWidth),((7)*nWidth));
-        // _oContext.drawImage(eyeimg,((nCount-7)*nWidth),0,((7)*nWidth),((7)*nWidth));
-        // _oContext.drawImage(eyeimg,0,((nCount-7)*nWidth),((7)*nWidth),((7)*nWidth));
-        
-        // working prototype do not delete
-
-        // test going on
+        // working 
+        // going on
 
         // console.log(nCount,nWidth,);
         let clr = _htOption.gradient ? gradient : dColor;
         _oContext.strokeStyle = clr;
         _oContext.fillStyle = clr;
+        _oContext.beginPath();
         // _oContext.color = 'red';
         _oContext.lineWidth = nWidth;
         _oContext.strokeRect(0+(nWidth/2)+_htOption.quietZone,0+(nWidth/2)+_htOption.quietZone,((6)*nWidth),((6)*nWidth));
