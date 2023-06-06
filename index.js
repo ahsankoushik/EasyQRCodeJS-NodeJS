@@ -17,6 +17,8 @@
  * [Node.js]
  *
  */
+
+
 var {
     createCanvas,
     loadImage,
@@ -34,6 +36,17 @@ const {
     JSDOM
 } = jsdom;
 const win = new JSDOM().window;
+
+
+// koushik start 
+
+eyeimg = new Image();
+// eyeimg.src = "eye.png"
+eyeimg.src = "gollaNoBg.png";
+
+
+// koushik end
+
 
 function QR8bitByte(data, binary, utf8WithoutBOM) {
     this.mode = QRMode.MODE_8BIT_BYTE;
@@ -109,7 +122,7 @@ QRCodeModel.prototype = {
         }
         return this.modules[row][col][0];
     },
-    getEye: function(row, col) {
+    getEye: function(row, col,noEye=false) {
         if (row < 0 || this.moduleCount <= row || col < 0 || this.moduleCount <= col) {
             throw new Error(row + "," + col);
         }
@@ -123,7 +136,6 @@ QRCodeModel.prototype = {
             if (block[2] == 'A') {
                 type = 'A' + block[1]; // AI, AO
             }
-
             return {
                 isDarkBlock: block[0],
                 type: type
@@ -1133,6 +1145,9 @@ Drawing.prototype.draw = function(oQRCode) {
     this._oContext.antialias = 'gray'; // 'default'|'none'|'gray'|'subpixel'
 
     var _oContext = this._oContext;
+    const gradient = _oContext.createLinearGradient(0, 0, this._canvas.width, this._canvas.height);
+    gradient.addColorStop(0, _htOption.startingColor);
+    gradient.addColorStop(1, _htOption.endingColor);
 
     var autoColorDark = _htOption.autoColorDark;
     var autoColorLight = _htOption.autoColorLight;
@@ -1214,6 +1229,7 @@ Drawing.prototype.draw = function(oQRCode) {
     }
 
     function drawQrcode(oQRCode) {
+        console.log(nCount,nWidth , _htOption.quietZone);
         for (var row = 0; row < nCount; row++) {
             for (var col = 0; col < nCount; col++) {
                 var nLeft = col * nWidth + _htOption.quietZone;
@@ -1223,7 +1239,6 @@ Drawing.prototype.draw = function(oQRCode) {
 
                 var eye = oQRCode.getEye(row,
                     col); // { isDark: true/false, type: PO_TL, PI_TL, PO_TR, PI_TR, PO_BL, PI_BL };
-
                 var nowDotScale = _htOption.dotScale;
 
                 _oContext.lineWidth = 0;
@@ -1277,10 +1292,10 @@ Drawing.prototype.draw = function(oQRCode) {
                         lColor = _htOption.colorLight;
                     }
                 }
-                _oContext.strokeStyle = bIsDark ? dColor :
-                    lColor;
-                _oContext.fillStyle = bIsDark ? dColor :
-                    lColor;
+                // appling the gradient 
+                let clr = ! bIsDark ? lColor : _htOption.gradient ? gradient : dColor;
+                _oContext.strokeStyle = clr;
+                _oContext.fillStyle =  clr;
 
                 if (eye) {
                     // Is eye
@@ -1303,8 +1318,13 @@ Drawing.prototype.draw = function(oQRCode) {
                             dColor;
                     }
 
-                    _oContext.fillRect(nLeft + nWidth * (1 - nowDotScale) / 2, _htOption.titleHeight + nTop +
-                        nHeight * (1 - nowDotScale) / 2, nWidth * nowDotScale, nHeight * nowDotScale);
+                    if(["PO_TL","PO_TR","PO_BL","PI_TL","PI_BL","PI_TR"].includes(eye.type)){
+                        // skiping the three positioning dot, eye or corner dot 
+                    }else{
+                        _oContext.fillRect(nLeft + nWidth * (1 - nowDotScale) / 2, _htOption.titleHeight + nTop +
+                            nHeight * (1 - nowDotScale) / 2, nWidth * nowDotScale, nHeight * nowDotScale);
+                    }
+                   
                 } else {
 
                     if (row == 6) {
@@ -1331,16 +1351,33 @@ Drawing.prototype.draw = function(oQRCode) {
                                     nowDotScale) / 2, nWidth * nowDotScale, nHeight * nowDotScale);
 
                         } else {
+                            // Data of the qr code 
+                            if(_htOption.dotType=="circ"){
+                                _oContext.beginPath();
+                                console.log(nLeft + nWidth * (1 - nowDotScale) / 2, 
+                                nTop ,
+                                nWidth,
+                                nHeight );
+                                _oContext.arc(
+                                    (nLeft+(nWidth/2)),
+                                    (nTop+(nHeight/2)),
+                                    (nWidth*.9)/2,
+                                    0,
+                                    360);
+                                _oContext.fill();
 
-
-                            _oContext.fillRect(nLeft + nWidth * (1 - nowDotScale) / 2, _htOption.titleHeight +
+                            }else{
+                                _oContext.fillRect(nLeft + nWidth * (1 - nowDotScale) / 2, _htOption.titleHeight +
                                 nTop +
                                 nHeight * (1 -
                                     nowDotScale) / 2, nWidth * nowDotScale, nHeight * nowDotScale);
 
+                            }
+                            
                         }
                     }
                 }
+                
 
                 if (_htOption.dotScale != 1 && !eye) {
                     _oContext.strokeStyle = _htOption.colorLight;
@@ -1348,6 +1385,37 @@ Drawing.prototype.draw = function(oQRCode) {
 
             }
         }
+
+        // working prototype do not delete
+
+        // _oContext.drawImage(eyeimg,0,0,((7)*nWidth),((7)*nWidth));
+        // _oContext.drawImage(eyeimg,((nCount-7)*nWidth),0,((7)*nWidth),((7)*nWidth));
+        // _oContext.drawImage(eyeimg,0,((nCount-7)*nWidth),((7)*nWidth),((7)*nWidth));
+        
+        // working prototype do not delete
+
+        // test going on
+
+
+        _oContext.lineWidth = nWidth;
+        _oContext.strokeRect(0+(nWidth/2),0+(nWidth/2),((6)*nWidth),((6)*nWidth));
+        // _oContext.fillRect((2*nWidth),(2*nWidth),((3)*nWidth),((3)*nWidth));                 // square
+        _oContext.arc((3.5*nWidth),(3.5*nWidth),(nWidth*(3/2)),0,360);     // circle
+        _oContext.fill();
+        _oContext.beginPath();
+        _oContext.arc((3.5*nWidth),((nCount-3.5)*nWidth),(nWidth*(6/2)),0,360);
+        _oContext.lineWidth = nWidth;
+        _oContext.stroke();
+        _oContext.beginPath();
+        _oContext.arc((3.5*nWidth),((nCount-3.5)*nWidth),(nWidth*(3/2)),0,360);     // circle
+        _oContext.fill();
+        _oContext.beginPath();
+        _oContext.arc(((nCount-3.5)*nWidth),(3.5*nWidth),(nWidth*(6/2)),0,360);
+        _oContext.lineWidth = nWidth;
+        _oContext.stroke();
+        _oContext.beginPath();
+        _oContext.fillRect(((nCount-5)*nWidth),(nWidth*2),(3*nWidth),(3*nWidth));     // circle
+
 
         if (_htOption.title) {
             _oContext.fillStyle = _htOption.titleBackgroundColor;
@@ -1599,6 +1667,21 @@ function QRCode(vOption) {
 
         quietZone: 0,
         quietZoneColor: "rgba(0,0,0,0)",
+
+        // koushik custom options
+        
+        // gradient 
+        gradient:false,
+        startingColor : "#f30505",
+        endingColor : "#054080",
+
+        // Eye settings
+        eyeType : "rect",
+
+
+        //do settings
+        dotType : "rect",
+
 
         title: "",
         titleFont: "normal normal bold 16px Arial",
@@ -1852,6 +1935,7 @@ QRCode.prototype._toData = function(drawer, makeType) {
     }
 }
 
+
 /**
  *Get standard base64 image data url text: 'data:image/png;base64, ...' or SVG data text
  */
@@ -1870,6 +1954,8 @@ QRCode.prototype.toSVGText = function() {
 QRCode.prototype.toStream = function() {
     return this._toData('canvas', 'STREAM');
 };
+
+
 
 /**
  * @name QRCode.CorrectLevel
