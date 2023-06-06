@@ -1145,6 +1145,7 @@ Drawing.prototype.draw = function(oQRCode) {
     this._oContext.antialias = 'gray'; // 'default'|'none'|'gray'|'subpixel'
 
     var _oContext = this._oContext;
+    // gradient 
     const gradient = _oContext.createLinearGradient(0, 0, this._canvas.width, this._canvas.height);
     gradient.addColorStop(0, _htOption.startingColor);
     gradient.addColorStop(1, _htOption.endingColor);
@@ -1229,7 +1230,7 @@ Drawing.prototype.draw = function(oQRCode) {
     }
 
     function drawQrcode(oQRCode) {
-        console.log(nCount,nWidth , _htOption.quietZone);
+        console.log(nCount,nWidth);
         for (var row = 0; row < nCount; row++) {
             for (var col = 0; col < nCount; col++) {
                 var nLeft = col * nWidth + _htOption.quietZone;
@@ -1324,6 +1325,8 @@ Drawing.prototype.draw = function(oQRCode) {
                         _oContext.fillRect(nLeft + nWidth * (1 - nowDotScale) / 2, _htOption.titleHeight + nTop +
                             nHeight * (1 - nowDotScale) / 2, nWidth * nowDotScale, nHeight * nowDotScale);
                     }
+                    // _oContext.fillRect(nLeft + nWidth * (1 - nowDotScale) / 2, _htOption.titleHeight + nTop +
+                    // nHeight * (1 - nowDotScale) / 2, nWidth * nowDotScale, nHeight * nowDotScale);
                    
                 } else {
 
@@ -1354,10 +1357,10 @@ Drawing.prototype.draw = function(oQRCode) {
                             // Data of the qr code 
                             if(_htOption.dotType=="circ"){
                                 _oContext.beginPath();
-                                console.log(nLeft + nWidth * (1 - nowDotScale) / 2, 
-                                nTop ,
-                                nWidth,
-                                nHeight );
+                                // console.log(nLeft + nWidth * (1 - nowDotScale) / 2, 
+                                // nTop ,
+                                // nWidth,
+                                // nHeight );
                                 _oContext.arc(
                                     (nLeft+(nWidth/2)),
                                     (nTop+(nHeight/2)),
@@ -1378,7 +1381,6 @@ Drawing.prototype.draw = function(oQRCode) {
                     }
                 }
                 
-
                 if (_htOption.dotScale != 1 && !eye) {
                     _oContext.strokeStyle = _htOption.colorLight;
                 }
@@ -1396,26 +1398,29 @@ Drawing.prototype.draw = function(oQRCode) {
 
         // test going on
 
-
+        // console.log(nCount,nWidth,);
+        let clr = _htOption.gradient ? gradient : dColor;
+        _oContext.strokeStyle = clr;
+        _oContext.fillStyle = clr;
+        // _oContext.color = 'red';
         _oContext.lineWidth = nWidth;
-        _oContext.strokeRect(0+(nWidth/2),0+(nWidth/2),((6)*nWidth),((6)*nWidth));
+        _oContext.strokeRect(0+(nWidth/2)+_htOption.quietZone,0+(nWidth/2)+_htOption.quietZone,((6)*nWidth),((6)*nWidth));
         // _oContext.fillRect((2*nWidth),(2*nWidth),((3)*nWidth),((3)*nWidth));                 // square
-        _oContext.arc((3.5*nWidth),(3.5*nWidth),(nWidth*(3/2)),0,360);     // circle
+        _oContext.arc((3.5*nWidth)+_htOption.quietZone,(3.5*nWidth)+_htOption.quietZone,(nWidth*(3/2)),0,360);     // circle
         _oContext.fill();
         _oContext.beginPath();
-        _oContext.arc((3.5*nWidth),((nCount-3.5)*nWidth),(nWidth*(6/2)),0,360);
+        _oContext.arc((3.5*nWidth)+_htOption.quietZone,((nCount-3.5)*nWidth)+_htOption.quietZone,(nWidth*(6/2)),0,360);
         _oContext.lineWidth = nWidth;
         _oContext.stroke();
         _oContext.beginPath();
-        _oContext.arc((3.5*nWidth),((nCount-3.5)*nWidth),(nWidth*(3/2)),0,360);     // circle
+        _oContext.arc((3.5*nWidth)+_htOption.quietZone,((nCount-3.5)*nWidth)+_htOption.quietZone,(nWidth*(3/2)),0,360);     // circle
         _oContext.fill();
         _oContext.beginPath();
-        _oContext.arc(((nCount-3.5)*nWidth),(3.5*nWidth),(nWidth*(6/2)),0,360);
+        _oContext.arc(((nCount-3.5)*nWidth)+_htOption.quietZone,(3.5*nWidth)+_htOption.quietZone,(nWidth*(6/2)),0,360);
         _oContext.lineWidth = nWidth;
         _oContext.stroke();
         _oContext.beginPath();
-        _oContext.fillRect(((nCount-5)*nWidth),(nWidth*2),(3*nWidth),(3*nWidth));     // circle
-
+        _oContext.fillRect(((nCount-5)*nWidth)+_htOption.quietZone,(nWidth*2)+_htOption.quietZone,(3*nWidth),(3*nWidth));     // circle
 
         if (_htOption.title) {
             _oContext.fillStyle = _htOption.titleBackgroundColor;
